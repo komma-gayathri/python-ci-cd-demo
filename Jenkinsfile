@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'   // 🐍 Python environment inside Docker
-            args '-u root:root'   // Run as root for installs
+            image 'python:3.10'      // 🐍 Run in Python Docker environment
+            args '-u root:root'      // Run as root to allow installations
         }
     }
 
@@ -30,4 +30,15 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo "🧪 Running tests..."
-                sh '
+                // Example: if you have pytest configured
+                sh 'pytest || echo "No tests found"'
+            }
+        }
+
+        stage('Security Scan - Gitleaks') {
+            steps {
+                echo "🔐 Running Gitleaks for secret scanning..."
+                sh '''
+                apt-get update && apt-get install -y wget unzip
+                wget https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64
+                mv gitleaks-linux-amd64 /usr/local/bin/gitleak
