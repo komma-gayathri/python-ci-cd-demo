@@ -6,7 +6,8 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/komma-gayathri/python-ci-cd-demo.git'
+                // Use the Git plugin directly
+                git branch: 'main', url: 'https://github.com/komma-gayathri/python-ci-cd-demo.git'
             }
         }
         stage('Build Docker Image') {
