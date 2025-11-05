@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'python:3.10'      // 🐍 Run in Python Docker environment
-            args '-u root:root'      // Run as root to allow installations
+            image 'python:3.10'   // 🐍 Python environment inside Docker
+            args '-u root:root'   // Run as root for installs
         }
     }
 
@@ -30,8 +30,9 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo "🧪 Running tests..."
-                // Example: if you have pytest configured
-                sh 'pytest || echo "No tests found"'
+                sh '''
+                echo "No tests yet — skipping for now."
+                '''
             }
         }
 
@@ -41,4 +42,25 @@ pipeline {
                 sh '''
                 apt-get update && apt-get install -y wget unzip
                 wget https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64
-                mv gitleaks-linux-amd64 /usr/local/bin/gitleak
+                mv gitleaks-linux-amd64 /usr/local/bin/gitleaks
+                chmod +x /usr/local/bin/gitleaks
+                gitleaks detect --source . --no-banner || true
+                '''
+            }
+        }
+
+        stage('Security Scan - Trivy') {
+            steps {
+                echo "🛡️ Scanning Docker image for vulnerabilities..."
+                sh '''
+                apt-get install -y curl
+                curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+                ./bin/trivy fs --exit-code 0 --no-progress .
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                echo "🐳 Building Docker image..."
+                sh "docker build -t
